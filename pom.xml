@@ -1,0 +1,107 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.alfresco</groupId>
+  <artifactId>alfresco-xmlfactory</artifactId>
+  <version>1.0.4-SNAPSHOT</version>
+  <packaging>jar</packaging>
+  <name>xmlfactory</name>
+  <description>Alfresco-defined SAXParserFactory and DocumentBuilderFactory implementations, derived from the Xerces versions, 
+     which allow features to be configured on and off at bootstrap</description>
+  <url>http://www.alfresco.com/</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <issueManagement>
+    <system>JIRA</system>
+    <url>https://issues.alfresco.com/jira/browse/ACE</url>
+  </issueManagement>
+
+  <scm>
+    <connection>scm:svn:http://svn.alfresco.com/repos/alfresco-open-mirror/modules/xmlfactory</connection>
+    <developerConnection>scm:svn:https://${user.name}@svn.alfresco.com/repos/alfresco-enterprise/modules/xmlfactory</developerConnection>
+    <url>http://svn.alfresco.com/repos/alfresco-open-mirror/modules/xmlfactory</url>
+  </scm>
+
+  <repositories>
+    <repository>
+      <id>alfresco-public-snapshots</id>
+      <url>https://artifacts.alfresco.com/nexus/content/groups/public-snapshots</url>
+      <snapshots>
+          <enabled>true</enabled>
+        <updatePolicy>daily</updatePolicy>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>alfresco-public</id>
+      <url>https://artifacts.alfresco.com/nexus/content/groups/public</url>
+    </repository>
+  </repositories>
+
+  <distributionManagement>
+    <repository>
+      <id>alfresco-internal-releases</id>
+      <url>https://nexus.alfresco.com/nexus/content/repositories/internal-releases</url>
+    </repository>
+    <snapshotRepository>
+      <id>alfresco-internal-snapshots</id>
+      <url>https://nexus.alfresco.com/nexus/content/repositories/internal-snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+        <groupId>xerces</groupId>
+        <artifactId>xercesImpl</artifactId>
+        <version>2.10.0-alfresco-patched</version>
+    </dependency>
+    <dependency>
+        <groupId>commons-logging</groupId>
+        <artifactId>commons-logging</artifactId>        
+        <version>1.1.1</version>
+        <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.1</version>
+        <configuration>
+          <target>1.5</target>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.4</version>
+        <configuration>
+          <descriptors>
+            <descriptor>src/assembly/bin.xml</descriptor>
+          </descriptors>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>
