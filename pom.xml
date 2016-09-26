@@ -5,14 +5,14 @@
   <parent>
      <groupId>org.alfresco</groupId>
      <artifactId>alfresco-super-pom</artifactId>
-     <version>6</version>
+     <version>1</version>
   </parent>
 
   <artifactId>alfresco-xmlfactory</artifactId>
   <name>Alfresco XML Factory</name>
   <description>Alfresco-defined SAXParserFactory and DocumentBuilderFactory implementations, derived from the Xerces versions,
      which allow features to be configured on and off at bootstrap</description>
-  <version>6.0-SNAPSHOT</version>
+  <version>1.1-SNAPSHOT</version>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
