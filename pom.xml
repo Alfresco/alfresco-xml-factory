@@ -7,7 +7,7 @@
   <version>1.0.4-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>xmlfactory</name>
-  <description>Alfresco-defined SAXParserFactory and DocumentBuilderFactory implementations, derived from the Xerces versions, 
+  <description>Alfresco-defined SAXParserFactory and DocumentBuilderFactory implementations, derived from the Xerces versions,
      which allow features to be configured on and off at bootstrap</description>
   <url>http://www.alfresco.com/</url>
 
@@ -21,9 +21,10 @@
   </issueManagement>
 
   <scm>
-    <connection>scm:svn:http://svn.alfresco.com/repos/alfresco-open-mirror/modules/xmlfactory</connection>
-    <developerConnection>scm:svn:https://${user.name}@svn.alfresco.com/repos/alfresco-enterprise/modules/xmlfactory</developerConnection>
-    <url>http://svn.alfresco.com/repos/alfresco-open-mirror/modules/xmlfactory</url>
+    <connection>scm:git:https://gitlab.alfresco.com/platform/alfresco-xml-factory.git</connection>
+    <developerConnection>scm:git:https://gitlab.alfresco.com/platform/alfresco-xml-factory.git</developerConnection>
+    <url>https://gitlab.alfresco.com/platform/alfresco-xml-factory</url>
+    <tag>HEAD</tag>
   </scm>
 
   <repositories>
@@ -66,7 +67,7 @@
     </dependency>
     <dependency>
         <groupId>commons-logging</groupId>
-        <artifactId>commons-logging</artifactId>        
+        <artifactId>commons-logging</artifactId>
         <version>1.1.1</version>
         <scope>provided</scope>
     </dependency>
