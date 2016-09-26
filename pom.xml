@@ -5,7 +5,7 @@
   <parent>
      <groupId>org.alfresco</groupId>
      <artifactId>alfresco-super-pom</artifactId>
-     <version>1</version>
+     <version>6</version>
   </parent>
 
   <artifactId>alfresco-xmlfactory</artifactId>
