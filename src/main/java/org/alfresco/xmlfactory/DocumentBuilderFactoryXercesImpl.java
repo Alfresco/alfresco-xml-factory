@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2014 Alfresco Software Limited.
+ * Copyright (C) 2005-2016 Alfresco Software Limited.
  *
  * This file is part of Alfresco
  *
@@ -18,29 +18,25 @@
  */
 package org.alfresco.xmlfactory;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.xerces.jaxp.DocumentBuilderFactoryImpl;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+
 public class DocumentBuilderFactoryXercesImpl extends DocumentBuilderFactoryImpl
 {
-    private static List<String> featuresToEnable = FactoryHelper.DEFAULT_FEATURES_TO_ENABLE;
-    private static List<String> featuresToDisable = FactoryHelper.DEFAULT_FEATURES_TO_DISABLE;
-    
+    // Static so we only do this configuration lookup once
+    private static FactoryHelper factoryHelper = new FactoryHelper();
+    private static List<String> FEATURES_TO_ENABLE = factoryHelper.getConfiguration(DocumentBuilderFactory.class,
+                  FactoryHelper.FEATURES_TO_ENABLE,  FactoryHelper.DEFAULT_FEATURES_TO_ENABLE);
+    private static List<String> FEATURES_TO_DISABLE = factoryHelper.getConfiguration(DocumentBuilderFactory.class,
+                  FactoryHelper.FEATURES_TO_DISABLE, FactoryHelper.DEFAULT_FEATURES_TO_DISABLE);
+    private static List<String> WHITE_LIST_CALLERS = factoryHelper.getConfiguration(DocumentBuilderFactory.class,
+                  FactoryHelper.WHITE_LIST_CALLERS,  FactoryHelper.DEFAULT_WHITE_LIST_CALLERS);
+
     public DocumentBuilderFactoryXercesImpl()
     {
-        super();
-        FactoryHelper.configureFactory(this, featuresToEnable, featuresToDisable);
-    }
-    
-    public void setFeaturesToEnable(List<String> featuresToEnable)
-    {
-        DocumentBuilderFactoryXercesImpl.featuresToEnable = new ArrayList<String>(featuresToEnable);
-    }
-    
-    public void setFeaturesToDisable(List<String> featuresToDisable)
-    {
-        DocumentBuilderFactoryXercesImpl.featuresToDisable = new ArrayList<String>(featuresToDisable);
+        factoryHelper.configureFactory(this, FEATURES_TO_ENABLE, FEATURES_TO_DISABLE, WHITE_LIST_CALLERS);
     }
 }

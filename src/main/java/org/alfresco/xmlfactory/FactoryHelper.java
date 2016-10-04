@@ -18,10 +18,10 @@
  */
 package org.alfresco.xmlfactory;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.*;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -58,7 +58,7 @@ public class FactoryHelper
                     FEATURE_DISALLOW_DOCTYPE)));
 
     /* white list of classes that can use the parsers with no security restrictions */
-    public final static List<String> WHITE_LIST_CALLERS = Collections.unmodifiableList(new ArrayList<String>(
+    public final static List<String> DEFAULT_WHITE_LIST_CALLERS = Collections.unmodifiableList(new ArrayList<String>(
            Arrays.asList(
                     "com.sun.xml.ws.transport.http.servlet.WSServletContextListener",
                     "org.springframework.beans.factory.xml.XmlBeanDefinitionReader",
@@ -69,10 +69,15 @@ public class FactoryHelper
                     "org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl"
                     )));
 
-    public static void configureFactory(DocumentBuilderFactory factory,
-            List<String> featuresToEnable, List<String> featuresToDisable)
+    // Property names used to configure the factories
+    public static final String FEATURES_TO_ENABLE  = "features.to.enable";
+    public static final String FEATURES_TO_DISABLE = "features.to.disable";
+    public static final String WHITE_LIST_CALLERS =  "white.list.callers";
+
+    public void configureFactory(DocumentBuilderFactory factory, List<String> featuresToEnable,
+                                 List<String> featuresToDisable, List<String> whiteListCallers)
     {
-        if (!isCallInWhiteList())
+        if (!isCallInWhiteList(whiteListCallers))
         {
             if (featuresToEnable != null)
             {
@@ -92,14 +97,38 @@ public class FactoryHelper
         }
     }
 
-    private static boolean isCallInWhiteList()
+    public void configureFactory(SAXParserFactory factory, List<String> featuresToEnable,
+                                 List<String> featuresToDisable, List<String> whiteListCallers)
+    {
+        if (!isCallInWhiteList(whiteListCallers))
+        {
+            if (featuresToEnable != null)
+            {
+                for (String featureToEnable : featuresToEnable)
+                {
+                    setFeature(factory, featureToEnable, true);
+                }
+            }
+            if (featuresToDisable != null)
+            {
+                for (String featureToDisable : featuresToDisable)
+                {
+                    setFeature(factory, featureToDisable, false);
+                }
+            }
+            applyAdditionalFeatures(factory);
+        }
+    }
+
+    private boolean isCallInWhiteList(List<String> whiteListCallers)
     {
         StackTraceElement[] currentStackTrace = (new Exception()).getStackTrace();
         for (int i = 0; i < currentStackTrace.length; i++)
         {
-            for (String className : WHITE_LIST_CALLERS)
+            String currentClassName = currentStackTrace[i].getClassName();
+            for (String className : whiteListCallers)
             {
-                if (currentStackTrace[i].getClassName().equals(className))
+                if (currentClassName.equals(className))
                 {
                     logger.debug("Found " + className + " in white list.");
                     return true;
@@ -109,7 +138,7 @@ public class FactoryHelper
         return false;
     }
 
-    private static void applyAdditionalFeatures(DocumentBuilderFactory factory)
+    private void applyAdditionalFeatures(DocumentBuilderFactory factory)
     {
         try
         {
@@ -122,7 +151,19 @@ public class FactoryHelper
         }
     }
 
-    private static void setFeature(DocumentBuilderFactory factory, String feature, boolean enable)
+    private void applyAdditionalFeatures(SAXParserFactory factory)
+    {
+        try
+        {
+            factory.setXIncludeAware(false);
+        }
+        catch (Exception e)
+        {
+            logConfigurationFailure(factory.getClass().getName(), e);
+        }
+    }
+
+    private void setFeature(DocumentBuilderFactory factory, String feature, boolean enable)
     {
         try
         {
@@ -134,7 +175,7 @@ public class FactoryHelper
         }
     }
 
-    private static void setFeature(SAXParserFactory factory, String feature, boolean enable)
+    private void setFeature(SAXParserFactory factory, String feature, boolean enable)
     {
         try
         {
@@ -154,7 +195,7 @@ public class FactoryHelper
         }
     }
 
-    private static void logConfigurationFailure(String factoryName, String feature, Exception e)
+    private void logConfigurationFailure(String factoryName, String feature, Exception e)
     {
         if (logger.isWarnEnabled())
         {
@@ -162,7 +203,7 @@ public class FactoryHelper
         }
     }
 
-    private static void logConfigurationFailure(String factoryName, Exception e)
+    private void logConfigurationFailure(String factoryName, Exception e)
     {
         if (logger.isWarnEnabled())
         {
@@ -170,19 +211,153 @@ public class FactoryHelper
         }
     }
 
-    public static void configureFactory(SAXParserFactory factory,
-            List<String> featuresToEnable, List<String> featuresToDisable) {
-        if (!isCallInWhiteList()) {
-            if (featuresToEnable != null) {
-                for (String featureToEnable : featuresToEnable) {
-                    setFeature(factory, featureToEnable, true);
+    /**
+     * Returns a List of features (to be enabled or disabled) or class names (to be included in a caller white list) for
+     * a factory. This method uses a similar approach to the one used to select the JAXP factories in the first place.
+     * The following order is used to find a semicolon separated list of values:
+     * <li>A system property {@code}&lt;factoryName>.<propertyNameSuffix>{@code} if it exists and is accessible
+     *     (for example {@code}javax.xml.parsers.SAXParserFactory.enable{@code}=...).</li>
+     * <li>A property in {@code}$JAVA_HOME/lib/&lt;factoryName>.properties{@code} if it exists.</li>
+     * <li>A property in {@code}META-INF/services/&lt;factoryName>.properties{@code} if it exists.</li>
+     * <li>The {@code}deafultFeatures{@code} parameter passed to this method.</li>
+     *
+     * @param factoryClass used to look up the &lt;factoryName>.
+     * @param propertyName used as the property name in files or as the suffix in a sysme property.
+     * @param defaultFeatures to be returned if other values are not found.
+     * @return the list of features or class names.
+     */
+    public List<String> getConfiguration(Class<?> factoryClass, String propertyName, List<String> defaultFeatures)
+    {
+        List<String> features = defaultFeatures;
+        ClassLoader loader = null;
+
+        String factoryName = factoryClass.getName();
+        String extendedPropertyName = factoryName+'.'+propertyName;
+
+        // Look for values in <factoryName>.enable or <factoryName>.disable
+        String value = null;
+        try
+        {
+            value = getSystemProperty(extendedPropertyName);
+        }
+        catch (SecurityException e)
+        {
+            logger.debug("Error reading system property:"+extendedPropertyName, e);
+        }
+
+        // Look for values in $JAVA_HOME/jre/lib/<factoryName>.properties.
+        if (value == null)
+        {
+            URL url = null;
+            String javaHome = getJavaHome();
+            if (javaHome != null)
+            {
+                File file = new File(new File(new File(javaHome), "lib"), factoryName+".properties");
+                try
+                {
+                    url = file.toURI().toURL();
+                    value = getProperty(url, propertyName);
                 }
-            }
-            if (featuresToDisable != null) {
-                for (String featureToDisable : featuresToDisable) {
-                    setFeature(factory, featureToDisable, false);
+                catch (MalformedURLException e)
+                {
+                    logger.debug("Error creating URL for:"+file, e);
                 }
             }
         }
+
+        // Look for values in META-INF/services/<factoryName>.properties.
+        if (value == null)
+        {
+            String resourceName = "META-INF/services/" + factoryName+".properties";
+            URL url = getResource(loader, resourceName);
+            value = getProperty(url, propertyName);
+        }
+
+        // Add features to a new List
+        if (value != null)
+        {
+            features = new ArrayList<>();
+            value = value.trim();
+            if (!value.isEmpty())
+            {
+                for (String feature: value.split(";"))
+                {
+                    features.add(feature.trim());
+                }
+            }
+        }
+
+        return features;
+    }
+
+    String getJavaHome()
+    {
+        return System.getenv("JAVA_HOME");
+    }
+
+    String getSystemProperty(String propertyName)
+    {
+        return System.getProperty(propertyName);
+    }
+
+    URL getResource(ClassLoader loader, String resourceName)
+    {
+        return loader == null
+                ? ClassLoader.getSystemResource(resourceName)
+                : loader.getResource(resourceName);
+    }
+
+    String getProperty(URL url, String propertyName)
+    {
+        String value = null;
+        if (url != null)
+        {
+            Properties properties = getProperties(url);
+            value = properties.getProperty(propertyName);
+        }
+        return value;
+    }
+
+    private Properties getProperties(URL url)
+    {
+        Properties properties = new Properties();
+        InputStream in = null;
+        Reader reader = null;
+        try
+        {
+            in = url.openStream();
+            reader = new InputStreamReader(in, "UTF-8");
+            properties.load(reader);
+        }
+        catch (IOException e)
+        {
+            logger.debug("Error reading :"+url, e);
+        }
+        finally
+        {
+            if (reader != null)
+            {
+                try
+                {
+                    reader.close();
+                }
+                catch (IOException e)
+                {
+                    // ignore
+                }
+            }
+            if (in != null)
+            {
+                try
+                {
+                    in.close();
+                }
+                catch (IOException e)
+                {
+                    // ignore
+                }
+            }
+        }
+        return properties;
     }
 }
