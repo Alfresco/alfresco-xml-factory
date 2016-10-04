@@ -213,10 +213,11 @@ public class FactoryHelper
 
     /**
      * Returns a List of features (to be enabled or disabled) or class names (to be included in a caller white list) for
-     * a factory. This method uses a similar approach to the one used to select the JAXP factories in the first place.
-     * The following order is used to find a semicolon separated list of values:
-     * <li>A system property {@code}&lt;factoryName>.<propertyNameSuffix>{@code} if it exists and is accessible
-     *     (for example {@code}javax.xml.parsers.SAXParserFactory.enable{@code}=...).</li>
+     * a factory. A similar approach to the one used to select the JAXP factories in the first place is used to find a
+     * property value for each configurable value. The property names are: {@code}features.to.enable{@code},
+     * {@code}features.to.disable{@code} and {@code}white.list.callers{@code}. The following order is used to find a
+     * semicolon separated list of values for each property:
+     * <li>A system property {@code}&lt;factoryName>.<propertyName>{@code} if it exists and is accessible.</li>
      * <li>A property in {@code}$JAVA_HOME/lib/&lt;factoryName>.properties{@code} if it exists.</li>
      * <li>A property in {@code}META-INF/services/&lt;factoryName>.properties{@code} if it exists.</li>
      * <li>The {@code}deafultFeatures{@code} parameter passed to this method.</li>
