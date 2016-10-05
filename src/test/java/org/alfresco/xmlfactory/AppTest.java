@@ -100,6 +100,55 @@ public class AppTest
         assertFalse(spf.isXIncludeAware());
     }
 
+    /**
+     * Test we have set features the way we expect as defaults.
+     */
+    public void testDocumentBuilderFactoryInWhiteList() throws Throwable
+    {
+        // Using constructor rather than the service locator and then using the helper to configure it.
+        DocumentBuilderFactory dbf = new DocumentBuilderFactoryImpl();
+        FactoryHelper factoryHelper = new FactoryHelper();
+        List<String> whiteListClasses = Collections.singletonList(getClass().getName());
+        factoryHelper.configureFactory(dbf, FactoryHelper.DEFAULT_FEATURES_TO_ENABLE,
+                FactoryHelper.DEFAULT_FEATURES_TO_DISABLE,
+                whiteListClasses);
+
+        assertFalse(dbf.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+        assertFalse(dbf.getFeature(FactoryHelper.FEATURE_DISALLOW_DOCTYPE));
+
+        assertTrue(dbf.getFeature(FactoryHelper.FEATURE_EXTERNAL_GENERAL_ENTITIES));
+        assertTrue(dbf.getFeature(FactoryHelper.FEATURE_EXTERNAL_PARAMETER_ENTITIES));
+        assertTrue(dbf.getFeature(FactoryHelper.FEATURE_USE_ENTITY_RESOLVER2));
+        assertTrue(dbf.getFeature(FactoryHelper.FEATURE_LOAD_EXTERNAL_DTD));
+
+        assertTrue(dbf.isExpandEntityReferences());
+        assertFalse(dbf.isXIncludeAware()); // false is the default so is same as the non whitelist test
+    }
+
+    /**
+     * Test we have set features the way we expect as defaults.
+     */
+    public void testSAXParserFactoryInWhiteList() throws Throwable
+    {
+        // Using constructor rather than the service locator and then using the helper to configure it.
+        SAXParserFactory spf = new SAXParserFactoryImpl();
+        FactoryHelper factoryHelper = new FactoryHelper();
+        List<String> whiteListClasses = Collections.singletonList(getClass().getName());
+        factoryHelper.configureFactory(spf, FactoryHelper.DEFAULT_FEATURES_TO_ENABLE,
+                FactoryHelper.DEFAULT_FEATURES_TO_DISABLE,
+                whiteListClasses);
+
+        assertFalse(spf.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+        assertFalse(spf.getFeature(FactoryHelper.FEATURE_DISALLOW_DOCTYPE));
+
+        assertTrue(spf.getFeature(FactoryHelper.FEATURE_EXTERNAL_GENERAL_ENTITIES));
+        assertTrue(spf.getFeature(FactoryHelper.FEATURE_EXTERNAL_PARAMETER_ENTITIES));
+        assertTrue(spf.getFeature(FactoryHelper.FEATURE_USE_ENTITY_RESOLVER2));
+        assertTrue(spf.getFeature(FactoryHelper.FEATURE_LOAD_EXTERNAL_DTD));
+
+        assertFalse(spf.isXIncludeAware()); // false is the default so is same as the non whitelist test
+    }
+
     private class TestFactoryHelper extends FactoryHelper
     {
         final Map<String, Properties> testValues = new HashMap<>();
@@ -166,55 +215,6 @@ public class AppTest
         {
             return url == null ? null : getTestValue(url.toString(), propertyName);
         }
-    }
-
-    /**
-     * Test we have set features the way we expect as defaults.
-     */
-    public void testDocumentBuilderFactoryInWhiteList() throws Throwable
-    {
-        // Using constructor rather than the service locator and then using the helper to configure it.
-        DocumentBuilderFactory dbf = new DocumentBuilderFactoryImpl();
-        FactoryHelper factoryHelper = new FactoryHelper();
-        List<String> whiteListClasses = Collections.singletonList(getClass().getName());
-        factoryHelper.configureFactory(dbf, FactoryHelper.DEFAULT_FEATURES_TO_ENABLE,
-                FactoryHelper.DEFAULT_FEATURES_TO_DISABLE,
-                whiteListClasses);
-
-        assertFalse(dbf.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
-        assertFalse(dbf.getFeature(FactoryHelper.FEATURE_DISALLOW_DOCTYPE));
-
-        assertTrue(dbf.getFeature(FactoryHelper.FEATURE_EXTERNAL_GENERAL_ENTITIES));
-        assertTrue(dbf.getFeature(FactoryHelper.FEATURE_EXTERNAL_PARAMETER_ENTITIES));
-        assertTrue(dbf.getFeature(FactoryHelper.FEATURE_USE_ENTITY_RESOLVER2));
-        assertTrue(dbf.getFeature(FactoryHelper.FEATURE_LOAD_EXTERNAL_DTD));
-
-        assertTrue(dbf.isExpandEntityReferences());
-        assertFalse(dbf.isXIncludeAware()); // false is the default so is same as the non whitelist test
-    }
-
-    /**
-     * Test we have set features the way we expect as defaults.
-     */
-    public void testSAXParserFactoryInWhiteList() throws Throwable
-    {
-        // Using constructor rather than the service locator and then using the helper to configure it.
-        SAXParserFactory spf = new SAXParserFactoryImpl();
-        FactoryHelper factoryHelper = new FactoryHelper();
-        List<String> whiteListClasses = Collections.singletonList(getClass().getName());
-        factoryHelper.configureFactory(spf, FactoryHelper.DEFAULT_FEATURES_TO_ENABLE,
-                FactoryHelper.DEFAULT_FEATURES_TO_DISABLE,
-                whiteListClasses);
-
-        assertFalse(spf.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
-        assertFalse(spf.getFeature(FactoryHelper.FEATURE_DISALLOW_DOCTYPE));
-
-        assertTrue(spf.getFeature(FactoryHelper.FEATURE_EXTERNAL_GENERAL_ENTITIES));
-        assertTrue(spf.getFeature(FactoryHelper.FEATURE_EXTERNAL_PARAMETER_ENTITIES));
-        assertTrue(spf.getFeature(FactoryHelper.FEATURE_USE_ENTITY_RESOLVER2));
-        assertTrue(spf.getFeature(FactoryHelper.FEATURE_LOAD_EXTERNAL_DTD));
-
-        assertFalse(spf.isXIncludeAware()); // false is the default so is same as the non whitelist test
     }
 
     /**
