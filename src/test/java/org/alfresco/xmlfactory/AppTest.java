@@ -71,16 +71,15 @@ public class AppTest
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 
         assertTrue(dbf.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
-// TODO uncomment: Having this commented out takes XmlFactory back to how it was before the latest changes
-//        assertTrue(dbf.getFeature(FactoryHelper.FEATURE_DISALLOW_DOCTYPE));
+        // Disllowing DOCTYPE disables too much in terms of transformations
+        // assertTrue(dbf.getFeature(FactoryHelper.FEATURE_DISALLOW_DOCTYPE));
 
         assertFalse(dbf.getFeature(FactoryHelper.FEATURE_EXTERNAL_GENERAL_ENTITIES));
         assertFalse(dbf.getFeature(FactoryHelper.FEATURE_EXTERNAL_PARAMETER_ENTITIES));
         assertFalse(dbf.getFeature(FactoryHelper.FEATURE_USE_ENTITY_RESOLVER2));
         assertFalse(dbf.getFeature(FactoryHelper.FEATURE_LOAD_EXTERNAL_DTD));
 
-// TODO uncomment: Having this commented out takes XmlFactory back to how it was before the latest changes
-//        assertFalse(dbf.isExpandEntityReferences());
+        assertFalse(dbf.isExpandEntityReferences());
         assertFalse(dbf.isXIncludeAware());
     }
 
@@ -92,8 +91,8 @@ public class AppTest
         SAXParserFactory spf = SAXParserFactory.newInstance();
 
         assertTrue(spf.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
-// TODO uncomment: Having this commented out takes XmlFactory back to how it was before the latest changes
-//        assertTrue(spf.getFeature(FactoryHelper.FEATURE_DISALLOW_DOCTYPE));
+        // Disllowing DOCTYPE disables too much in terms of transformations
+        // assertTrue(dbf.getFeature(FactoryHelper.FEATURE_DISALLOW_DOCTYPE));
 
         assertFalse(spf.getFeature(FactoryHelper.FEATURE_EXTERNAL_GENERAL_ENTITIES));
         assertFalse(spf.getFeature(FactoryHelper.FEATURE_EXTERNAL_PARAMETER_ENTITIES));

@@ -60,29 +60,27 @@ class FactoryHelper
                     FEATURE_LOAD_EXTERNAL_DTD,
 
                     ADDITIONAL_FEATURE_X_INCLUDE_AWARE
-// TODO uncomment: Having this commented out takes XmlFactory back to how it was before the latest changes
-//                    , ADDITIONAL_FEATURE_EXPAND_ENTITY_REFERENCES
+                    , ADDITIONAL_FEATURE_EXPAND_ENTITY_REFERENCES
                     )));
 
     final static List<String> DEFAULT_FEATURES_TO_ENABLE = Collections.unmodifiableList(new ArrayList<>(
             Arrays.asList(
                     XMLConstants.FEATURE_SECURE_PROCESSING
-// TODO uncomment: Having this commented out takes XmlFactory back to how it was before the latest changes
-//                    , FEATURE_DISALLOW_DOCTYPE
+                    // Disllowing DOCTYPE disables too much in terms of transformations
+                    // , FEATURE_DISALLOW_DOCTYPE
                     )));
 
     /* white list of classes that can use the parsers with no security restrictions */
     final static List<String> DEFAULT_WHITE_LIST_CALLERS = Collections.unmodifiableList(new ArrayList<>(
            Arrays.asList(
-// TODO uncomment: Having this commented out takes XmlFactory back to how it was before the latest changes
-//                    "com.sun.xml.ws.transport.http.servlet.WSServletContextListener",
-//                    "org.springframework.beans.factory.xml.XmlBeanDefinitionReader",
-//                    "org.springframework.beans.factory.support.AbstractBeanFactory",
-//                    "org.apache.myfaces.config.FacesConfigurator",
-//                    "org.hibernate.cfg.Configuration",
-//                    "org.alfresco.ibatis.HierarchicalXMLConfigBuilder",
-//                    "org.alfresco.repo.security.permissions.impl.model.PermissionModel",
-//                    "org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl"
+                    "com.sun.xml.ws.transport.http.servlet.WSServletContextListener",
+                    "org.springframework.beans.factory.xml.XmlBeanDefinitionReader",
+                    "org.springframework.beans.factory.support.AbstractBeanFactory",
+                    "org.apache.myfaces.config.FacesConfigurator",
+                    "org.hibernate.cfg.Configuration",
+                    "org.alfresco.ibatis.HierarchicalXMLConfigBuilder",
+                    "org.alfresco.repo.security.permissions.impl.model.PermissionModel",
+                    "org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl"
                     )));
 
     // Property names used to configure the factories
