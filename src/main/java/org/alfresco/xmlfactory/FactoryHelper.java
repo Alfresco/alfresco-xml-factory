@@ -24,8 +24,10 @@ import java.net.URL;
 import java.util.*;
 
 import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.commons.logging.Log;
@@ -59,8 +61,8 @@ class FactoryHelper
                     FEATURE_USE_ENTITY_RESOLVER2,
                     FEATURE_LOAD_EXTERNAL_DTD,
 
-                    ADDITIONAL_FEATURE_X_INCLUDE_AWARE
-                    , ADDITIONAL_FEATURE_EXPAND_ENTITY_REFERENCES
+                    ADDITIONAL_FEATURE_X_INCLUDE_AWARE,
+                    ADDITIONAL_FEATURE_EXPAND_ENTITY_REFERENCES
                     )));
 
     final static List<String> DEFAULT_FEATURES_TO_ENABLE = Collections.unmodifiableList(new ArrayList<>(
@@ -88,9 +90,15 @@ class FactoryHelper
     static final String FEATURES_TO_DISABLE = "features.to.disable";
     static final String WHITE_LIST_CALLERS =  "white.list.callers";
 
+    private static volatile int counter = 1;
+    private int debugCounter = counter++;
+
+    private final int STACK_DEPTH = 30;
+
     void configureFactory(DocumentBuilderFactory factory, List<String> featuresToEnable,
                                  List<String> featuresToDisable, List<String> whiteListCallers)
     {
+        debugStack("DocumentBuilderFactory newInstance", 3, STACK_DEPTH);
         if (!isCallInWhiteList(whiteListCallers))
         {
             if (featuresToEnable != null)
@@ -113,6 +121,7 @@ class FactoryHelper
     void configureFactory(SAXParserFactory factory, List<String> featuresToEnable,
                                  List<String> featuresToDisable, List<String> whiteListCallers)
     {
+        debugStack("SAXParserFactory newInstance", 3, STACK_DEPTH);
         if (!isCallInWhiteList(whiteListCallers))
         {
             if (featuresToEnable != null)
@@ -142,12 +151,28 @@ class FactoryHelper
             {
                 if (currentClassName.equals(className))
                 {
-                    logger.debug("Found " + className + " in white list.");
+                    debug(debugCounter+" Found " + className + " in white list.");
                     return true;
                 }
             }
         }
         return false;
+    }
+
+    private void debugStack(String message, int fromStackDepth, int maxStackDepth) {
+        if (logger.isDebugEnabled())
+        {
+            debug(debugCounter+" "+message);
+
+            StackTraceElement[] currentStackTrace = (new Exception()).getStackTrace();
+            StringJoiner stackDebug = new StringJoiner("\n");
+            for (int i=fromStackDepth; i<currentStackTrace.length && i<maxStackDepth+fromStackDepth; i++)
+            {
+                StackTraceElement frame = currentStackTrace[i];
+                stackDebug.add(debugCounter+"   "+frame);
+            }
+            debug(stackDebug.toString());
+        }
     }
 
     private void setFeature(DocumentBuilderFactory factory, String feature, boolean enable)
@@ -166,6 +191,7 @@ class FactoryHelper
             {
                 factory.setFeature(feature, enable);
             }
+            debug(debugCounter+" DocumentBuilderFactory "+feature+" "+enable);
         }
         catch (ParserConfigurationException pce)
         {
@@ -185,11 +211,22 @@ class FactoryHelper
             {
                 factory.setFeature(feature, enable);
             }
+            debug(debugCounter+" SAXParserFactory "+feature+" "+enable);
         }
         catch (ParserConfigurationException | SAXNotSupportedException | SAXNotRecognizedException e)
         {
             logConfigurationFailure(factory.getClass().getName(), feature, e);
         }
+    }
+
+    public void debugNewParser(DocumentBuilder parser)
+    {
+        debugStack("New DocumentBuilder", 3, STACK_DEPTH);
+    }
+
+    public void debugNewParser(SAXParser parser)
+    {
+        debugStack("New SAXParser", 3, STACK_DEPTH);
     }
 
     private void logConfigurationFailure(String factoryName, String feature, Exception e)
@@ -228,10 +265,11 @@ class FactoryHelper
         try
         {
             value = getSystemProperty(extendedPropertyName);
+            debugPropertyFrom(propertyName, value, "-D"+extendedPropertyName);
         }
         catch (SecurityException e)
         {
-            logger.debug("Error reading system property:"+extendedPropertyName, e);
+            debug(debugCounter+" Error reading system property:"+extendedPropertyName, e);
         }
 
         // Look for values in $JAVA_HOME/jre/lib/<factoryName>.properties.
@@ -245,10 +283,11 @@ class FactoryHelper
                 {
                     URL url = file.toURI().toURL();
                     value = getProperty(url, propertyName);
+                    debugPropertyFrom(propertyName, value, file);
                 }
                 catch (MalformedURLException e)
                 {
-                    logger.debug("Error creating URL for:"+file, e);
+                    debug(debugCounter+" Error creating URL for:"+file, e);
                 }
             }
         }
@@ -259,6 +298,7 @@ class FactoryHelper
             String resourceName = "META-INF/services/" + factoryName+".properties";
             URL url = getResource(null, resourceName);
             value = getProperty(url, propertyName);
+            debugPropertyFrom(propertyName, value, resourceName);
         }
 
         // Add features to a new List
@@ -276,6 +316,16 @@ class FactoryHelper
         }
 
         return features;
+    }
+
+    private void debugPropertyFrom(String propertyName, String value, Object source) {
+        if (logger.isDebugEnabled())
+        {
+            if (value != null)
+            {
+                debug(debugCounter+" "+propertyName+" "+value+" loaded from "+ source);
+            }
+        }
     }
 
     String getJavaHome()
@@ -319,7 +369,7 @@ class FactoryHelper
         }
         catch (IOException e)
         {
-            logger.debug("Error reading :"+url, e);
+            debug(debugCounter+" Error reading :"+url, e);
         }
         finally
         {
@@ -347,5 +397,17 @@ class FactoryHelper
             }
         }
         return properties;
+    }
+
+    private void debug(String message)
+    {
+        logger.debug(message);
+        // System.out.println(message);
+    }
+
+    private void debug(String message, Exception e)
+    {
+        logger.debug(message, e);
+        // System.out.println(message);
     }
 }

@@ -20,6 +20,8 @@ package org.alfresco.xmlfactory;
 
 import org.apache.xerces.jaxp.SAXParserFactoryImpl;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.util.List;
 
@@ -37,5 +39,13 @@ public class SAXParserFactoryXercesImpl extends SAXParserFactoryImpl
     public SAXParserFactoryXercesImpl()
     {
         factoryHelper.configureFactory(this, FEATURES_TO_ENABLE, FEATURES_TO_DISABLE, WHITE_LIST_CALLERS);
+    }
+
+    @Override
+    public SAXParser newSAXParser() throws ParserConfigurationException
+    {
+        SAXParser saxParser = super.newSAXParser();
+        factoryHelper.debugNewParser(saxParser);
+        return saxParser;
     }
 }

@@ -22,7 +22,9 @@ import java.util.List;
 
 import org.apache.xerces.jaxp.DocumentBuilderFactoryImpl;
 
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 public class DocumentBuilderFactoryXercesImpl extends DocumentBuilderFactoryImpl
 {
@@ -38,5 +40,12 @@ public class DocumentBuilderFactoryXercesImpl extends DocumentBuilderFactoryImpl
     public DocumentBuilderFactoryXercesImpl()
     {
         factoryHelper.configureFactory(this, FEATURES_TO_ENABLE, FEATURES_TO_DISABLE, WHITE_LIST_CALLERS);
+    }
+
+    @Override
+    public DocumentBuilder newDocumentBuilder() throws ParserConfigurationException {
+        DocumentBuilder documentBuilder = super.newDocumentBuilder();
+        factoryHelper.debugNewParser(documentBuilder);
+        return documentBuilder;
     }
 }
