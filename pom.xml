@@ -23,9 +23,9 @@
   </issueManagement>
 
   <scm>
-    <connection>scm:git:https://gitlab.alfresco.com/platform/alfresco-xml-factory.git</connection>
-    <developerConnection>scm:git:https://gitlab.alfresco.com/platform/alfresco-xml-factory.git</developerConnection>
-    <url>https://gitlab.alfresco.com/platform/alfresco-xml-factory</url>
+    <connection>scm:git:https://github.com/Alfresco/alfresco-xml-factory.git</connection>
+    <developerConnection>scm:git:https://github.com/Alfresco/alfresco-xml-factory.git</developerConnection>
+    <url>https://github.com/Alfresco/alfresco-xml-factory</url>
     <tag>1.1</tag>
   </scm>
 
