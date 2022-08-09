@@ -1,0 +1,35 @@
+language: java
+jdk: openjdk17
+dist: focal
+
+git:
+  depth: false
+  quiet: true
+
+cache:
+  directories:
+    - ${HOME}/.m2/repository
+
+branches:
+  only:
+    - master
+    - /feature\/.*/
+    - /release\/.*/
+    - /support\/.*/
+
+stages:
+  - build
+  - release
+
+before_install: mkdir -p ${HOME}/.m2 && cp -rf _ci/settings.xml ${HOME}/.m2/
+
+jobs:
+  include:
+    - stage: build
+      name: "Build and Test"
+      install: mvn -B -U install
+
+    - stage: release
+      name: "Release"
+      if: commit_message ~= /\[release\]/ AND branch ~= /^(master|SP\/.+|HF\/.+)$/
+      script: travis_wait 55 bash _ci/release.sh
