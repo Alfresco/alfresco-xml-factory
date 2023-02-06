@@ -52,5 +52,4 @@ jobs:
           email: ${{ secrets.BOT_GITHUB_EMAIL }}
       - name: "Release"
         timeout-minutes: 60
-        run: |
-          bash _ci/release.sh
+        run: bash _ci/release.sh
