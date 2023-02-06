@@ -1,4 +1,4 @@
-name: ACS Community Packaging CI
+name: Alfresco XML Factory CI
 
 on:
   pull_request:
