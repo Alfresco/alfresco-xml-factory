@@ -1,0 +1,29 @@
+# Auto-generated .travis.yml file
+# Generated 2020-11-25 10:03:46 from Bamboo build plan PLAT-XMLF
+
+language: java
+
+jdk:
+  - oraclejdk8
+
+dist: trusty
+
+stages:
+  - name: Default Stage
+  - name: Release
+    if: fork = false AND (branch = master OR branch =~ /support\/.*/) AND type != pull_request AND commit_message !~ /\[no-release\]/
+
+jobs:
+  include:
+    - stage: "Default Stage"
+      name: "Default Job"
+      script:
+        # Build + Install
+        - mvn --batch-mode -U clean install -Dmaven.test.failure.ignore=true
+        # Sonar
+        - mvn --batch-mode org.codehaus.mojo:sonar-maven-plugin:sonar
+    - stage: "Release"
+      name: "Release"
+      script:
+        # Build
+        - GIT_AUTHOR_NAME=alfresco-build GIT_AUTHOR_EMAIL=build@alfresco.com GIT_COMMITTER_NAME=alfresco-build GIT_COMMITTER_EMAIL=build@alfresco.com mvn --batch-mode -DreleaseVersion=${RELEASE_VERSION} -DdevelopmentVersion=${DEVELOPMENT_VERSION}  -Dusername=alfresco-build -Dpassword=${GITHUB_PASSWORD} release:prepare release:perform
